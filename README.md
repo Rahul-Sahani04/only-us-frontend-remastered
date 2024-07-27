@@ -11,6 +11,7 @@ Welcome to Only Us! This project is a real-time chat application built with Reac
     - [Running the App](#running-the-app)
 - [Project Structure](#project-structure)
 - [Available Scripts](#available-scripts)
+- [Screenshot](#screenshot)
 - [Configuration](#configuration)
 - [Contributing](#contributing)
 - [License](#license)
@@ -139,6 +140,12 @@ It correctly bundles React in production mode and optimizes the build for the be
 **Note: this is a one-way operation. Once you [`eject`], you can't go back!**
 
 If you aren't satisfied with the build tool and configuration choices, you can [`eject`] at any time. This command will remove the single build dependency from your project.
+
+## Screenshot
+
+### Login Page
+
+![Login Page](src/assets/LogIn.gif)
 
 ## Configuration
 
