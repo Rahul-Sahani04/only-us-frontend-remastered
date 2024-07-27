@@ -17,7 +17,7 @@ import { UserPlusIcon, BanIcon, AtSignIcon } from "../raw_components/raw_icons";
 import ProfileCardStranger from "./ProfileCardStranger";
 import { Cross1Icon } from "@radix-ui/react-icons";
 
-  export const SideBar = ({ socket, findUser, disconnectSelf, OtherUser, connectPopup, addFriend, acceptFriend }) => {
+  export const SideBar = ({ socket, findUser, disconnectSelf, OtherUser, connectPopup, addFriend, acceptFriend, targetId }) => {
     // const userEmail = localStorage.getItem("email");
 
     
@@ -86,7 +86,7 @@ import { Cross1Icon } from "@radix-ui/react-icons";
           <Button className="w-5/6 border-primary" onClick={findUser}>
             Find User
           </Button>
-          <Button className="w-5/6 border-primary" onClick={disconnectSelf}>
+          <Button className={`w-5/6 border-primary ${!targetId ? " hover:cursor-not-allowed" : " hover:cursor-pointer"}`} onClick={disconnectSelf} disabled={!targetId}>
             Disconnect
           </Button>
         </div>

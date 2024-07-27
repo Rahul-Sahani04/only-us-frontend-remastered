@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { signInWithPopup } from 'firebase/auth';
-import { auth, provider } from '../components/Config_Firebase';
+import { signInWithPopup } from "firebase/auth";
+import { auth, provider } from "../components/Config_Firebase";
 
 import "../css/Login.css";
 import { Input } from "../raw_components/raw_input";
@@ -11,103 +11,138 @@ import ParticlesDemo from "../components/ParticlesBackground";
 
 import toast, { Toaster } from "react-hot-toast";
 
-
 const Signup = () => {
-  const [credentials, setCredentials] = useState({ email: "", pass: "", username:"" });
+  const [credentials, setCredentials] = useState({
+    email: "",
+    pass: "",
+    username: "",
+  });
   const navigate = useNavigate();
 
-  const [value, setValue] = useState('')
-
+  const [value, setValue] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:5004/api/auth/createuser", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: credentials.email,
-          pass: credentials.pass,
-          username: credentials.username
-        }),
-      });
+      const response = await fetch(
+        "http://localhost:5004/api/auth/createuser",
+        {
+          method: "POST",
+          headers: {
+            "Content-type": "application/json",
+          },
+          body: JSON.stringify({
+            email: credentials.email,
+            pass: credentials.pass,
+            username: credentials.username,
+          }),
+        }
+      );
 
       const json = await response.json();
       console.log(json);
+
       if (!json.success) {
-        // alert('Invaid Credentials')
-      }
+        // alert('Enter Valid Credentials')
+        toast.error("Incorrect Credentials!", "error");
+      } else {
+        toast.success("Successfully Created Account", "success");
+        navigate("/");
 
-      if (json.success) {
-        localStorage.setItem("auth-Token", json.authToken);
-        localStorage.setItem("email", credentials.email);
-        if (json.adminId) {
-          localStorage.setItem("admin", json.adminId);
-        }
-
-        toast.success('Success message');
-        navigate("/home")
+        // alert('Account Created Successfull')
       }
     } catch (error) {
-      toast.error('Error message', 'error');
       console.log(error);
     }
   };
 
-// handles Google authentication of user
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+//     try {
+//       const response = await fetch(
+//         "http://localhost:5004/api/auth/createuser",
+//         {
+//           method: "POST",
+//           headers: {
+//             "Content-Type": "application/json",
+//           },
+//           body: JSON.stringify({
+//             email: credentials.email,
+//             pass: credentials.pass,
+//             username: credentials.username,
+//           }),
+//         }
+//       );
+
+//       const json = await response.json();
+//       console.log(json);
+//       if (!json.success) {
+//         // alert('Invaid Credentials')
+//       }
+
+//       if (json.success) {
+//         localStorage.setItem("auth-Token", json.authToken);
+//         localStorage.setItem("email", credentials.email);
+//         if (json.adminId) {
+//           localStorage.setItem("admin", json.adminId);
+//         }
+
+//         toast.success("Success message");
+//         navigate("/home");
+//       }
+//     } catch (error) {
+//       toast.error("Error message", "error");
+//       console.log(error);
+//     }
+//   };
+
+  // handles Google authentication of user
   const handleClickk = async (e) => {
     try {
-        const data = await signInWithPopup(auth, provider);
-        console.log(data);
-        setValue(data.user.email);
-        localStorage.setItem("email", data.user.email);
+      const data = await signInWithPopup(auth, provider);
+      console.log(data);
+      setValue(data.user.email);
+      localStorage.setItem("email", data.user.email);
 
-        const response = await fetch('http://localhost:5004/api/auth/google_signup', {
-            method: "POST",
-            headers: {
-                "Content-type": 'application/json'
-            },
-            body: JSON.stringify({
-                email: data.user.email,
-                name: data.user.displayName,
-                phone: data.user.phoneNumber,
-                id: data.user.uid
-            })
-        });
-
-        const json = await response.json();
-        localStorage.setItem('auth-Token', json.authToken)
-        // window.location.reload(false);
-        console.log(json);
-        if (!json.success) {
-            // showAlert('Danger', 'Invalid Credentials')
-            // calltoast("Incorrect Credentials!", "error")
-            // alert('Invalid Credentials');
-            toast.error('Invalid Credentials');
-        } else {
-            // showAlert('success', 'Logged in Successfully');
-            // calltoast("Logged In successfully!", "success")
-            toast.success('Logged In');
-            navigate("/home")
-            // alert('Logged In');
-
+      const response = await fetch(
+        "http://localhost:5004/api/auth/google_signup",
+        {
+          method: "POST",
+          headers: {
+            "Content-type": "application/json",
+          },
+          body: JSON.stringify({
+            email: data.user.email,
+            name: data.user.displayName,
+            phone: data.user.phoneNumber,
+            id: data.user.uid,
+          }),
         }
+      );
 
+      const json = await response.json();
+      localStorage.setItem("auth-Token", json.authToken);
+      // window.location.reload(false);
+      console.log(json);
+      if (!json.success) {
+        // showAlert('Danger', 'Invalid Credentials')
+        // calltoast("Incorrect Credentials!", "error")
+        // alert('Invalid Credentials');
+        // toast.error("Invalid Credentials");
+      } else {
+        // showAlert('success', 'Logged in Successfully');
+        // calltoast("Logged In successfully!", "success")
+        setTimeout(() => {
+          toast.success("Signed In Successfully");
+        }, 1000);
+
+        navigate("/home");
+        // alert('Logged In');
+      }
     } catch (error) {
-        console.error(error);
+      console.error(error);
     }
-}
-
-
-  useEffect(() => {
-    setValue(localStorage.getItem('email'))
-
-    if (localStorage.getItem('auth-Token')) {
-        navigate('/')
-    }
-    }, [])
+  };
 
   const onChange = (e) => {
     setCredentials({ ...credentials, [e.target.name]: e.target.value });
@@ -120,14 +155,16 @@ const Signup = () => {
       <Toaster />
       <div className="login-grandfather-cont flex flex-col">
         <span className="pointer-events-none whitespace-pre-wrap bg-gradient-to-b from-black to-gray-300/80 bg-clip-text text-center text-8xl font-semibold leading-none text-transparent dark:from-white dark:to-slate-900/10">
-        Only Us 
-      </span>
-      <span className="mt-4 pointer-events-none whitespace-pre-wrap  text-gray-800/80 bg-clip-text text-center text-xl font-semibold leading-none  dark:text-gray-100/80">
-        Talk to Strangers! Connect with the world.
-      </span>
+          Only Us
+        </span>
+        <span className="mt-4 pointer-events-none whitespace-pre-wrap  text-gray-800/80 bg-clip-text text-center text-xl font-semibold leading-none  dark:text-gray-100/80">
+          Talk to Strangers! Connect with the world.
+        </span>
         <div className="login-container" data-aos="fade-right">
           <div className="container my-3 inner-login-container">
-            <h2 className="my-4 text-xl font-sans font-medium text-center">Signup</h2>
+            <h2 className="my-4 text-xl font-sans font-medium text-center">
+              Signup
+            </h2>
             <form onSubmit={handleSubmit}>
               <div className="form-group m-2  ">
                 <Label htmlFor="exampleInputEmail1">Username</Label>
@@ -135,7 +172,7 @@ const Signup = () => {
                   type="text"
                   className="form-control"
                   id="exampleInputEmail1"
-                  name="email"
+                  name="username"
                   value={credentials.username}
                   aria-describedby="emailHelp"
                   onChangeFunc={onChange}
@@ -183,8 +220,12 @@ const Signup = () => {
               </div>
 
               <div className="flex justify-center">
-                <Button  type="submit" className="btn m-2 w-full" variant="secondary">
-                  Log In
+                <Button
+                  type="submit"
+                  className="btn m-2 w-full"
+                  variant="secondary"
+                >
+                  Sign Up
                 </Button>
               </div>
             </form>
@@ -192,7 +233,7 @@ const Signup = () => {
             <div>
               {!value && (
                 // <button onClick={handleClick}>Continue With Google</button>
-                <div className="google-cont">
+                <div className="google-cont mt-3">
                   <div className="google-btn" onClick={handleClickk}>
                     <div className="google-icon-wrapper">
                       <img
@@ -211,22 +252,16 @@ const Signup = () => {
             <center>
               <div className="form-caption my-4">
                 <p style={{ marginTop: "0px" }} className="text-zinc-400">
-                    Don't Have An Account?
-                    <Link to="/Signup" className="text-zinc-100 ml-2 font-medium">
-                      Signup
-                    </Link>
+                  Don't Have An Account?
+                  <Link to="/" className="text-zinc-100 ml-2 font-medium">
+                    Login
+                  </Link>
                 </p>
               </div>
             </center>
           </div>
         </div>
       </div>
-      {/* <form onSubmit={handleSubmit}>
-                <input type="text" name='email' onChange={onChange} id='inputEmail' />
-                <input type="text" name='pass' onChange={onChange} id='inputPass' />
-                <button type="submit" className="btn btn-primary mt-2">Log In</button>
-
-            </form> */}
     </div>
   );
 };

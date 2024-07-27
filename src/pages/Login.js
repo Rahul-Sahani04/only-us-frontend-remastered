@@ -49,7 +49,10 @@ const Login = () => {
           localStorage.setItem("admin", json.adminId);
         }
 
-        toast.success('Success message');
+        setTimeout(() => {
+          toast.success('Logged In Successfully');
+      } , 1000)
+      
         navigate("/home")
       }
     } catch (error) {
@@ -181,7 +184,7 @@ const Login = () => {
             <div>
               {!value && (
                 // <button onClick={handleClick}>Continue With Google</button>
-                <div className="google-cont">
+                <div className="google-cont my-3">
                   <div className="google-btn" onClick={handleClickk}>
                     <div className="google-icon-wrapper">
                       <img
@@ -210,12 +213,6 @@ const Login = () => {
           </div>
         </div>
       </div>
-      {/* <form onSubmit={handleSubmit}>
-                <input type="text" name='email' onChange={onChange} id='inputEmail' />
-                <input type="text" name='pass' onChange={onChange} id='inputPass' />
-                <button type="submit" className="btn btn-primary mt-2">Log In</button>
-
-            </form> */}
     </div>
   );
 };

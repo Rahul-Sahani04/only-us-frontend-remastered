@@ -21,7 +21,11 @@ import {
 } from "../raw_components/raw_icons";
 
 import { useNavigate } from "react-router-dom";
-export const UserSideBar = ({socket}) => {
+
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+
+export const UserSideBar = ({socket, friends}) => {
   
   const handleLogout = async () => {
     const response = await fetch(
@@ -46,6 +50,8 @@ export const UserSideBar = ({socket}) => {
   };
   const userEmail = localStorage.getItem("email");
   const navigate = useNavigate();
+
+
 
   const recentlyChatData = [
     {
@@ -75,6 +81,7 @@ export const UserSideBar = ({socket}) => {
     },
   ];
 
+
   return (
     <Card className="w-full h-full max-w-xs border-0 shadow-lg text-black relative bg-[#999999]">
       <div className="flex flex-col items-center">
@@ -97,7 +104,7 @@ export const UserSideBar = ({socket}) => {
                 Recently Interacted Strangers
               </h4>
               <div className="grid gap-2 overflow-y-auto max-h-32">
-                {recentlyChatData.map((chat) => (
+                {friends && friends.map((chat) => (
                   <div
                     key={chat.id}
                     className="flex items-center text-sm rounded-md bg-[#ededed] p-1 pl-4"

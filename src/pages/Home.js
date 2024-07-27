@@ -18,6 +18,8 @@ function Home() {
   const [messages, setMessages] = React.useState([]);
   const [message, setMessage] = React.useState("");
 
+  const [ friends, setFriends ] = useState([]);
+
   const [connectPopup, setConnectPopup] = useState(false);
 
   const sendButton = useRef(null);
@@ -106,6 +108,31 @@ function Home() {
     }
   };
 
+  const friendList = async() => {
+    try {
+      const response = await fetch("http://localhost:5004/api/auth/friendsList", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "auth-Token": localStorage.getItem("auth-Token"),
+        },
+      });
+      const json = await response.json();
+      if (!json.success) {
+        // alert('Invaid Credentials')
+        toast.error('Error message');
+      }
+      if (json.success) {
+        // Set friendlist
+        setFriends(json.friends);
+      }
+    }
+    catch (error) {
+      console.log(error);
+      toast.error('Error message');
+    }
+  };
+  
   const acceptFriend = async () => {
     try {
       const authToken = localStorage.getItem('auth-Token');
@@ -124,6 +151,12 @@ function Home() {
         // You can add additional logic here to update the UI or state as needed
         toast.success('Friend request accepted');
         setConnectPopup(false);
+
+        socket.emit("message", { user, message: "Friend request accepted", id: socket.id, targetId: targetId, system: true});
+
+        // update the friend list
+        friendList();
+        
       } else {
         console.log('Error:', result.message);
         toast.error("Error: ", result.message);
@@ -136,7 +169,6 @@ function Home() {
 
 
   const disconnectSelf = async () => {
-
       const response = await fetch('http://localhost:5004/api/auth/disconnectUser', {
         method: 'PUT',
         headers: {
@@ -148,11 +180,26 @@ function Home() {
 
       if (response.status === 200) {
         console.log("Status updated successfully");
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          { user : "Anony", message: "User disconnected", system: true },
+        ]);
+
+        setTargetId("");
+        setOtherUser({
+          userDetails: "Anonymous",
+        });
+
         socket.disconnect();
         
         // navigate("/");
       }
   };
+
+    
+  useEffect(() => {
+    friendList();
+  } , []);
 
 
 
@@ -172,6 +219,7 @@ function Home() {
       });
     });
 
+
     socket.on("welcome", (data) => {
       setMessages((prevMessages) => [...prevMessages, data]);
       console.log(data.user, data.message);
@@ -190,6 +238,11 @@ function Home() {
     socket.on("leave", (data) => {
       setMessages((prevMessages) => [...prevMessages, data]);
       console.log("User left", data.user, data.message);
+
+      setTargetId("");
+      setOtherUser({
+        userDetails: "Anonymous",
+      });
     });
   
     socket.on("sendMessage", (data) => {
@@ -241,7 +294,7 @@ function Home() {
   return (
     <div className="App">
       <Toaster />
-      <SideBar socket={socket} findUser={findUser}  disconnectSelf={disconnectSelf} OtherUser={OtherUser} connectPopup={connectPopup} addFriend={addFriend} acceptFriend={acceptFriend} />
+      <SideBar socket={socket} findUser={findUser}  disconnectSelf={disconnectSelf} OtherUser={OtherUser} connectPopup={connectPopup} addFriend={addFriend} acceptFriend={acceptFriend} targetId={targetId} friendList={friends}/>
 
       <ChatComponent
         messages={messages}
@@ -255,7 +308,7 @@ function Home() {
         targetId={targetId}
         chatInput={chatInput}
       />
-      <UserSideBar  socket={socket} />
+      <UserSideBar  socket={socket} friends={friends}/>
     </div>
   );
 }
