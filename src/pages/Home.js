@@ -162,8 +162,9 @@ function Home() {
     
     socket.on("connect", () => {
       console.log("connected");
-      setId(socket.id);
-      console.log(socket.id);
+      const id = socket.id;
+      setId(id);
+      console.log("My ID: ", socket.id);
   
       socket.emit("joined", {
         user: user,
@@ -214,15 +215,16 @@ function Home() {
     })
   
     socket.on("matchedUser", (data) => {
-      setTargetId(data);
+      const targetId = data;
+      setTargetId(targetId);
       console.log("Found a match", data);
 
       // Send a message to the other user that someone connected with them
-      socket.emit("sendMessage", { user, message: "Found a match", id: id, targetId: data, system: true});
+      socket.emit("sendMessage", { user, message: "Found a match", id: socket.id, targetId: data, system: true});
 
-      socket.emit("connectionEstablished", { id, targetId: targetId });
+      socket.emit("connectionEstablished", { id: socket.id, targetId: targetId });
 
-      
+      getOtherUserDetails();
 
       setMessages((prevMessages) => [
         ...prevMessages,
