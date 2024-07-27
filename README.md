@@ -149,7 +149,7 @@ If you aren't satisfied with the build tool and configuration choices, you can [
 
 ## Configuration
 
-To configure Firebase, update the [`src/components/Config_Firebase.js`]("/src/components/Config_Firebase.js") file with your Firebase project details.
+To configure Firebase, update the [`src/components/Config_Firebase.js`](/src/components/Config_Firebase.js) file with your Firebase project details.
 
 ```js
 const firebaseConfig = {
