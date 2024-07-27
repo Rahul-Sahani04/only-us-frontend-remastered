@@ -15,58 +15,84 @@ import { SideIcons } from "../raw_components/raw_icons";
 import { UserPlusIcon, BanIcon, AtSignIcon } from "../raw_components/raw_icons";
 
 import ProfileCardStranger from "./ProfileCardStranger";
+import { Cross1Icon } from "@radix-ui/react-icons";
+
+  export const SideBar = ({ socket, findUser, disconnectSelf, OtherUser, connectPopup, addFriend, acceptFriend }) => {
+    // const userEmail = localStorage.getItem("email");
+
+    
+    
 
 
-export const SideBar = ({ socket, findUser }) => {
-
-const userEmail = localStorage.getItem("email")
-
-  return (
-    <div className="relative flex w-1/3 h-full flex-col items-center gap-4 rounded-lg border bg-[#999999] p-4 pt-1 shadow-sm">
-      <div className="flex flex-col items-center mt-0">
-        <SideIcons className="w-full h-16 " />
-      </div>
-      <div className="flex items-center gap-4 ">
-        <div className="flex flex-col">
-          <ProfileCardStranger
-            user={{
-              name: userEmail,
-              location: "New Delhi, India",
-              friends: 20,
-              strangersMet: 25,
-            }}
-          />
-          <div className="flex flex-col items-center mt-6 p-4 bg-[#C7C7C7] rounded-lg border border-[#000000]">
-            <div className="flex justify-around  gap-2">
-              <Button variant="primary" size="icon" className="rounded-full">
-                <CheckIcon className="h-5 w-5" />
-                <span className="sr-only">Check</span>
-              </Button>
-              <Button variant="secondary" size="icon" className="rounded-full">
-                <UserPlusIcon className="h-5 w-5" />
-                <span className="sr-only">Add Friend</span>
-              </Button>
-              <Button variant="secondary" size="icon" className="rounded-full">
-                <BanIcon className="h-5 w-5" />
-                <span className="sr-only">Ban</span>
-              </Button>
-              <Button variant="secondary" size="icon" className="rounded-full">
-                <AtSignIcon className="h-5 w-5" />
-                <span className="sr-only">At Sign</span>
-              </Button>
+    return (
+      <div className="relative flex w-1/3 h-full flex-col items-center gap-4 rounded-lg border bg-[#999999] p-4 pt-1 shadow-sm">
+        <div className="flex flex-col items-center mt-0">
+          <SideIcons className="w-full h-16 " />
+        </div>
+        <div className="flex items-center gap-4 w-full">
+          <div className="flex flex-col w-full m-4">
+            <ProfileCardStranger
+              user={{
+                name: OtherUser.userDetails,
+                location: "New Delhi, India",
+                friends: 20,
+                strangersMet: 25,
+              }}
+            />
+            <div className="flex flex-col items-center mt-6 p-4 bg-[#C7C7C7] rounded-lg border border-[#000000]">
+              <div className="flex justify-around  gap-2">
+                {/* <Button variant="primary" size="icon" className="rounded-full">
+                  <CheckIcon className="h-5 w-5" />
+                  <span className="sr-only">Check</span>
+                </Button> */}
+                <Button variant="secondary" size="icon" className="rounded-full" onClick={addFriend}>
+                  <UserPlusIcon className="h-5 w-5" />
+                  <span className="sr-only" >Add Friend</span>
+                </Button>
+                <Button variant="secondary" size="icon" className="rounded-full">
+                  <BanIcon className="h-5 w-5" />
+                  <span className="sr-only">Ban</span>
+                </Button>
+                <Button variant="secondary" size="icon" className="rounded-full">
+                  <AtSignIcon className="h-5 w-5" />
+                  <span className="sr-only">At Sign</span>
+                </Button>
+              </div>
             </div>
+            {
+              connectPopup && (
+
+            <div className="flex flex-col items-center mt-6 p-4 bg-[#C7C7C7] rounded-lg border border-[#000000]">
+              <p className="text-center text-sm text-black">
+                Anonymous wants to connect with you
+              </p>
+              <div className="w-full flex justify-around  gap-2">
+                <Button variant="primary" size="icon" className="rounded-full" onClick={acceptFriend}>
+                  <CheckIcon className="h-5 w-5" />
+                  <span className="sr-only">Check</span>
+                </Button>
+                <Button variant="secondary" size="icon" className="rounded-full">
+                  <Cross1Icon className="h-5 w-5" />
+                  <span className="sr-only">Cross</span>
+                </Button>
+              </div>
+            </div>
+            )}
           </div>
         </div>
-      </div>
-      <div className="aspect-video w-full rounded-lg bg-muted " />
+        <div className="aspect-video w-full rounded-lg bg-muted " />
 
-      <div className="flex flex-col w-full items-center gap-4 absolute bottom-4">
-        <Button className="w-5/6 border-primary" onClick={findUser}>Find User</Button>
-        <Button className="w-5/6 border-primary" >Disconnect</Button>
+        <div className="flex flex-col w-full items-center gap-4 absolute bottom-4">
+          <Button className="w-5/6 border-primary" onClick={findUser}>
+            Find User
+          </Button>
+          <Button className="w-5/6 border-primary" onClick={disconnectSelf}>
+            Disconnect
+          </Button>
+        </div>
       </div>
-    </div>
-  );
-};
+    );
+  };
 
 function BlocksIcon(props) {
   return (

@@ -15,7 +15,7 @@ import { useEffect, useState } from "react";
 
 
 
-export default function ChatComponent({ socket, user, messages, setMessage, message, sendMessage, handleKeyDown }) {
+export default function ChatComponent({ socket, user, targetId, messages, setMessage, message, sendMessage, handleKeyDown, sendButton, chatInput }) {
 
 
 
@@ -46,22 +46,35 @@ export default function ChatComponent({ socket, user, messages, setMessage, mess
                 key={index}
                 className={`flex items-start gap-4  ${msg.user === "user" ? "justify-end" : "justify-start"}`}
               >
+                {
+                  !msg.system ? (
                 <div className="rounded-full bg-secondary-foreground px-3 py-2 text-sm text-secondary">
                   <ChatMessageContainer message={msg.message} user={msg.user} />
                 </div>
+                  ) : (
+                    <>
+                      <p className="w-full text-center text-sm text-black underline">System: {msg.message}</p>
+                    </>
+                  )
+                }
               </div>
             ))}
           </div>
           <div className="mt-4 flex items-center gap-2 backdrop-blur-lg">
             <Input
-              placeholder="Type your message..."
+              placeholder={targetId ? "Type your message..." : "Connect with someone to start chatting.."}
               className="flex-1 rounded-full bg-muted px-4 py-2 text-sm "
               value={message}
               onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={handleKeyDown}
               id="chatInput"
+              disabled={!targetId}
+
+            ref={chatInput}
             />
             <Button variant="primary" size="icon" className="rounded-full" 
-              onClick={sendMessage} onKeyDown={handleKeyDown}
+              onClick={sendMessage}
+              ref={sendButton}
             >
               <SendIcon className="h-5 w-5" />
             </Button>
