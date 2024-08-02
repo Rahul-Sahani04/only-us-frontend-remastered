@@ -22,7 +22,7 @@ import { SendIcon } from "../raw_components/raw_icons";
 import axios from "axios";
 import toast from "react-hot-toast";
 
-export function ChatDrawer({ editOpen, showEdit, closeEdit, toUserId }) {
+export function ChatDrawer({ editOpen, showEdit, closeEdit, toUserId, socket }) {
   const [userId, setUserId] = useState("");
 
   const [message, setMessage] = useState("");
@@ -70,6 +70,7 @@ export function ChatDrawer({ editOpen, showEdit, closeEdit, toUserId }) {
       if (response.data.success) {
         const originalMessages = response.data.messages;
 
+
         // Conditionally check if the user is the sender or receiver
         console.log("User is sender 0: ", originalMessages[0].from === userId);
         console.log("User is sender 1: ", originalMessages[1].from === userId);
@@ -111,24 +112,33 @@ export function ChatDrawer({ editOpen, showEdit, closeEdit, toUserId }) {
 
     try {
       console.log("targetId: ", targetId);
-      const response = await axios.post(
-        "http://localhost:5004/api/messagingLogic/message",
-        { toId: targetId, text: message, direction: "sent" },
-        {
-          headers: {
-            "auth-Token": localStorage.getItem("auth-Token"),
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      // const response = await axios.post(
+      //   "http://localhost:5004/api/messagingLogic/message",
+      //   { toId: targetId, text: message, direction: "sent" },
+      //   {
+      //     headers: {
+      //       "auth-Token": localStorage.getItem("auth-Token"),
+      //       "Content-Type": "application/json",
+      //     },
+      //   }
+      // );
 
-      if (response.data.success) {
-        // setMessages(prevMessages => [...prevMessages, response.data.message]);
-        fetchMessages();
-        setMessage("");
-      } else {
-        toast.error(response.data.message);
-      }
+      // if (response.data.success) {
+      //   // setMessages(prevMessages => [...prevMessages, response.data.message]);
+      //   // fetchMessages();
+      //   setMessage("");
+      // } else {
+      //   toast.error(response.data.message);
+      // }
+
+      socket.emit("message2", {
+        authToken: localStorage.getItem("auth-Token"),
+        toId: targetId,
+        text: message,
+        direction: "sent",
+      });
+
+      console.log("Message sent: ", message);
     } catch (err) {
       toast.error("Error sending message");
       console.error("Error sending message:", err);
@@ -149,7 +159,7 @@ export function ChatDrawer({ editOpen, showEdit, closeEdit, toUserId }) {
     fetchUser();
     if (toUserId) {
       setTargetId(toUserId);
-      fetchMessages(toUserId);
+      fetchMessages();
     }
 
     return () => {
@@ -159,14 +169,14 @@ export function ChatDrawer({ editOpen, showEdit, closeEdit, toUserId }) {
   }, [toUserId]);
 
   // Fetch messages every 5 seconds
-  React.useEffect(() => {
-    const interval = setInterval(() => {
-      fetchUser();
-      fetchMessages();
-    }, 5000);
+  // React.useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     fetchUser();
+  //     fetchMessages();
+  //   }, 1000);
 
-    return () => clearInterval(interval);
-  }, []);
+  //   return () => clearInterval(interval);
+  // }, []);
 
   return (
     <>

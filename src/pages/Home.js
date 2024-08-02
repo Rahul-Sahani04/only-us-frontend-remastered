@@ -268,6 +268,11 @@ function Home() {
     });
 
     socket.on("sendMessage", (data) => {
+      console.log("Message received", data);
+      setMessages((prevMessages) => [...prevMessages, data]);
+    });
+    socket.on("sendMessage1", (data) => {
+      console.log("Message received", data);
       setMessages((prevMessages) => [...prevMessages, data]);
     });
 
@@ -387,6 +392,7 @@ function Home() {
         showEdit={showEdit}
         closeEdit={closeEdit}
         toUserId={toId}
+        socket={socket}
       />
 
       <ChatComponent
