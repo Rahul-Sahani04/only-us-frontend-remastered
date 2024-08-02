@@ -65,7 +65,7 @@ const Login = () => {
   const handleClickk = async (e) => {
     try {
         const data = await signInWithPopup(auth, provider);
-        console.log(data);
+        // console.log(data);
         setValue(data.user.email);
         localStorage.setItem("email", data.user.email);
 
@@ -85,7 +85,7 @@ const Login = () => {
         const json = await response.json();
         localStorage.setItem('auth-Token', json.authToken)
         // window.location.reload(false);
-        console.log(json);
+
         if (!json.success) {
             // showAlert('Danger', 'Invalid Credentials')
             // calltoast("Incorrect Credentials!", "error")
@@ -182,8 +182,8 @@ const Login = () => {
             </form>
             <hr />
             <div>
-              {!value && (
-                // <button onClick={handleClick}>Continue With Google</button>
+              {/* {!value && ( */}
+                {/* <button onClick={handleClick}>Continue With Google</button> */}
                 <div className="google-cont my-3">
                   <div className="google-btn" onClick={handleClickk}>
                     <div className="google-icon-wrapper">
@@ -198,7 +198,7 @@ const Login = () => {
                     </p>
                   </div>
                 </div>
-              )}
+              {/* )} */}
             </div>
             <center>
               <div className="form-caption my-4">

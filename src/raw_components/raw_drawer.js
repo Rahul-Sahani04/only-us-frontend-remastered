@@ -6,7 +6,7 @@ import { RiCloseLine } from "@remixicon/react";
 
 import { cx, focusRing } from "../lib/utils";
 
-import { Button } from "./Button";
+import { Button } from "./ButtonVariants";
 
 const Drawer = (props) => {
   return <DrawerPrimitives.Root {...props} />;

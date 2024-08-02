@@ -25,7 +25,10 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-export const UserSideBar = ({socket, friends}) => {
+
+export const UserSideBar = ({socket, friends, toggleEdit, connectWithFriend }) => {
+
+
   
   const handleLogout = async () => {
     const response = await fetch(
@@ -48,38 +51,10 @@ export const UserSideBar = ({socket, friends}) => {
     localStorage.clear();
     navigate("/");
   };
+
   const userEmail = localStorage.getItem("email");
   const navigate = useNavigate();
 
-
-
-  const recentlyChatData = [
-    {
-      id: 1,
-      name: "Amelia Cooper",
-      avatar: "/placeholder-user.jpg",
-    },
-    {
-      id: 2,
-      name: "John Doe",
-      avatar: "/placeholder-user.jpg",
-    },
-    {
-      id: 3,
-      name: "Jane Doe",
-      avatar: "/placeholder-user.jpg",
-    },
-    {
-      id: 4,
-      name: "John Smith",
-      avatar: "/placeholder-user.jpg",
-    },
-    {
-      id: 5,
-      name: "Jane Smith",
-      avatar: "/placeholder-user.jpg",
-    },
-  ];
 
 
   return (
@@ -104,10 +79,11 @@ export const UserSideBar = ({socket, friends}) => {
                 Recently Interacted Strangers
               </h4>
               <div className="grid gap-2 overflow-y-auto max-h-32">
-                {friends && friends.map((chat) => (
+                {friends && friends.map((chat, index) => (
                   <div
-                    key={chat.id}
-                    className="flex items-center text-sm rounded-md bg-[#ededed] p-1 pl-4"
+                    key={"chat " + index}
+                    className="flex items-center text-sm rounded-md bg-[#ededed] p-1 pl-4 hover:cursor-pointer"
+                    onClick={() => connectWithFriend(chat._id)}
                   >
                     {/* <AvatarComponent
                     src={chat.avatar}
@@ -119,6 +95,11 @@ export const UserSideBar = ({socket, friends}) => {
                   </div>
                 ))}
               </div>
+              <Button variant="primary" className="w-full mt-4 p-1.5 border-2 border-secondary" onClick={toggleEdit}>
+                View All
+                <span className="sr-only">View all</span>
+              </Button>
+
             </div>
           </div>
         </div>
