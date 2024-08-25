@@ -1,7 +1,16 @@
-import { Card } from "../raw_components/raw_chatCard";
+import React from "react";
+import SendMessage from "./SendMessage";
+import "../css/chatComponent.css"
 
-export const ChatMessageContainer = ({ message, user }) => (
-  <Card className={`mx-auto max-w-xs ${user !== "user" ? "!bg-[#7b7b7b]" : "!bg-[#545454]"}`}>
-    <p className={"text-left"}> {message} </p>
-  </Card>
-);
+const ChatComponent = () => {
+  return (
+    <div className="chat_component">
+      <div className="chat-screen  w-full">ChatComponent</div>
+      <div className="sendMessage_container d-flex">
+        <SendMessage />
+      </div>
+    </div>
+  );
+};
+
+export default ChatComponent;

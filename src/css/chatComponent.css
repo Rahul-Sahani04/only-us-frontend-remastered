@@ -1,0 +1,19 @@
+.chat_component{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100vh;
+    justify-content: space-between;
+    padding-left: 2%;
+}
+.chat-screen{
+    height: 90vh;
+}
+
+.sendMessage_container{
+    width: 100%;
+}
+
+.sendMessage_container div{
+    width: 100%;
+}

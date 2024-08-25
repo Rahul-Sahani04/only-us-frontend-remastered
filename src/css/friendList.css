@@ -1,0 +1,25 @@
+.FriendList_grandfather_container{
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+.FriendList_container{
+    position: absolute;
+    bottom: 0px;
+    /* height: calc(100svh - 300px); */
+    background-color: blue;
+    width: 75%;
+    display: flex;
+    /* justify-content: center; */
+    border-radius: 20px 20px 0px 0px;
+    /* padding-left: 2px; */
+}
+.FriendList-topPart{
+    display: flex;
+    flex-direction: row;
+    height: 7vh;
+    width: 100%;
+    background-color: whitesmoke;
+    border-radius: 18px 18px 0px 0px;
+    align-items: center;
+}
