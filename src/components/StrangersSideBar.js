@@ -17,7 +17,7 @@ import { UserPlusIcon, BanIcon, AtSignIcon } from "../raw_components/raw_icons";
 import ProfileCardStranger from "./ProfileCardStranger";
 import { Cross1Icon } from "@radix-ui/react-icons";
 
-  export const SideBar = ({ socket, findUser, disconnectSelf, OtherUser, connectPopup, addFriend, acceptFriend, targetId }) => {
+  export const SideBar = ({ socket, findUser, disconnectSelf, OtherUser, connectPopup, addFriend, acceptFriend, targetId, declineFriend }) => {
     // const userEmail = localStorage.getItem("email");
 
     
@@ -71,7 +71,7 @@ import { Cross1Icon } from "@radix-ui/react-icons";
                   <CheckIcon className="h-5 w-5" />
                   <span className="sr-only">Check</span>
                 </Button>
-                <Button variant="secondary" size="icon" className="rounded-full">
+                <Button variant="secondary" size="icon" className="rounded-full" onClick={declineFriend}>
                   <Cross1Icon className="h-5 w-5" />
                   <span className="sr-only">Cross</span>
                 </Button>

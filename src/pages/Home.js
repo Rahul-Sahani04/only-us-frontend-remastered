@@ -4,7 +4,6 @@ import { SideBar } from "../components/StrangersSideBar";
 import { UserSideBar } from "../components/UserSideBar";
 import React, { useEffect, useRef, useState } from "react";
 
-
 import axios from "axios";
 
 import socketIo from "socket.io-client";
@@ -23,9 +22,12 @@ function Home() {
   const [messages, setMessages] = React.useState([]);
   const [message, setMessage] = React.useState("");
   const [getMessages, setGetMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState('');
 
-  const [toId, setToId] = useState('');
+  const [friendName, setFriendName] = useState("");
+
+  const [privateMessages, setPrivateMessages] = React.useState([]);
+
+  const [toId, setToId] = useState("");
 
   const [friends, setFriends] = useState([]);
 
@@ -41,12 +43,8 @@ function Home() {
     userDetails: "Anonymous",
   });
 
-  const sendMessage = () => {
-    if (messages) {
-      setMessages([...messages, message]);
-      setMessage("");
-    }
-  };
+  // If no user is found, let the user chat to gemini bot instead
+  const [isGemini, setIsGemini] = useState(false);
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
@@ -54,7 +52,35 @@ function Home() {
     }
   };
 
-  const send = () => {
+  const send = async () => {
+    if(message === "") {
+      return;
+    }
+
+    setMessages((prevMessages) => [...prevMessages, { user: "user", message }]);
+
+    if(isGemini) {
+      const response = await fetch("http://localhost:5004/api/gemini/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "auth-Token": localStorage.getItem("auth-Token"),
+        },
+        body: JSON.stringify({ userMessage: message }),
+      });
+
+      if (response.status === 200) {
+        const reply = await response.json();
+        console.log("Gemini response", reply);
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          { user: "Gemini", message: reply.message },
+        ]);
+      }
+      setMessage("");
+      return;
+    }
+
     socket.emit("message", { user, message, id, targetId });
     setMessage("");
     setMessages((prevMessages) => [...prevMessages, { user: "user", message }]);
@@ -67,6 +93,8 @@ function Home() {
     setMessages((prevMessages) => [
       { user: "user", message: "Finding a user", system: true },
     ]);
+
+
   };
 
   useEffect(() => {
@@ -186,6 +214,48 @@ function Home() {
     }
   };
 
+  const declineFriend = async () => {
+    try {
+      const authToken = localStorage.getItem("auth-Token");
+      const response = await fetch(
+        "http://localhost:5004/api/auth/declineFriend",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "auth-Token": authToken,
+          },
+        }
+      );
+
+      const result = await response.json();
+
+      if (response.status === 200) {
+        console.log("Friend request declined:", result.userDetails);
+        // You can add additional logic here to update the UI or state as needed
+        toast.success("Friend request declined");
+        setConnectPopup(false);
+
+        socket.emit("message", {
+          user,
+          message: "Friend request declined",
+          id: socket.id,
+          targetId: targetId,
+          system: true,
+        });
+
+        // update the friend list
+        friendList();
+      } else {
+        console.log("Error:", result.message);
+        toast.error("Error: ", result.message);
+      }
+    } catch (error) {
+      console.error("Error declining friend request:", error);
+      toast.error("Error declining friend request");
+    }
+  };
+
   const disconnectSelf = async () => {
     const response = await fetch(
       "http://localhost:5004/api/auth/disconnectUser",
@@ -217,7 +287,6 @@ function Home() {
     }
   };
 
-
   useEffect(() => {
     friendList();
   }, []);
@@ -240,11 +309,18 @@ function Home() {
     socket.on("friendList", () => {
       console.log("Friend list");
       friendList();
-    } );
+    });
 
     socket.on("welcome", (data) => {
       setMessages((prevMessages) => [...prevMessages, data]);
       console.log(data.user, data.message);
+    });
+
+    socket.on("noUserFound", (data) => {
+      setMessages((prevMessages) => [...prevMessages, data]);
+      console.log(data.user, data.message);
+      setIsGemini(true);
+      setTargetId("gemini");
     });
 
     socket.on("userJoined", (data) => {
@@ -271,9 +347,22 @@ function Home() {
       console.log("Message received", data);
       setMessages((prevMessages) => [...prevMessages, data]);
     });
-    socket.on("sendMessage1", (data) => {
-      console.log("Message received", data);
-      setMessages((prevMessages) => [...prevMessages, data]);
+
+    socket.on("sendMessagePrivate", (data) => {
+      console.log("Message received: ", data);
+      const data2 = {
+        user: data.user,
+        text: data.message,
+      };
+      if (privateMessages) {
+        console.log("Private message received: ", privateMessages);
+      }
+
+      privateMessages.map((msg) => {
+        console.log("Private message: ", msg);
+      });
+
+      setPrivateMessages((prevMessages) => [...prevMessages, data2]);
     });
 
     // Send a message to the other user that someone wants to connect with them
@@ -327,12 +416,42 @@ function Home() {
     };
   }, []);
 
+  const disconnectCurrentConnection2 = async () => {
+    try {
+      const authToken = localStorage.getItem("auth-Token");
+      if (!authToken) {
+        throw new Error("No auth token found in local storage");
+      }
+  
+      const response = await axios.post(
+        "http://localhost:5004/api/auth/updateCurrentConnection2",
+        {},
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "auth-Token": authToken,
+          },
+        }
+      );
+  
+      if (response.status === 200) {
+        console.log("Connection updated successfully");
+      } else {
+        console.warn(`Unexpected response status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error("Error updating connection:", error.message);
+    }
+  };
+
+
   const useToggleState = (initial = false) => {
     const [state, setState] = React.useState(initial);
 
     const close = () => {
       setState(false);
       setDrawerOpen(false);
+      disconnectCurrentConnection2();
     };
 
     const open = () => {
@@ -357,7 +476,6 @@ function Home() {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
 
   const toggleDrawer = () => {
-    
     if (drawerOpen) {
       closeEdit();
     } else {
@@ -367,10 +485,28 @@ function Home() {
   };
 
 
-  const connectWithFriend = async (friendId) => {
+  // useEffect(() => {
+  //   const onBeforeUnload = (ev) => {
+      
+  //     socket.disconnect();
+  //     ev.returnValue = "Anything you wanna put here!";
+  //     disconnectSelf();
+  //     return "Anything here as well, doesn't matter!";
+  //   };
+
+  //   window.addEventListener("beforeunload", onBeforeUnload);
+
+  //   return () => {
+  //     window.removeEventListener("beforeunload", onBeforeUnload);
+  //   };
+  // }, []);
+
+
+  const connectWithFriend = async (friendId, friendName) => {
     showEdit();
     setToId(friendId);
-  }
+    setFriendName(friendName);
+  };
 
   return (
     <div className="App">
@@ -383,6 +519,7 @@ function Home() {
         connectPopup={connectPopup}
         addFriend={addFriend}
         acceptFriend={acceptFriend}
+        declineFriend={declineFriend}
         targetId={targetId}
         friendList={friends}
       />
@@ -393,6 +530,9 @@ function Home() {
         closeEdit={closeEdit}
         toUserId={toId}
         socket={socket}
+        messages={privateMessages}
+        setMessages={setPrivateMessages}
+        friendName={friendName}
       />
 
       <ChatComponent
@@ -412,7 +552,6 @@ function Home() {
         friends={friends}
         toggleEdit={toggleDrawer}
         connectWithFriend={connectWithFriend}
-        
       />
     </div>
   );

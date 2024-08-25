@@ -26,7 +26,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 
-export const UserSideBar = ({socket, friends, toggleEdit, connectWithFriend }) => {
+export const UserSideBar = ({socket, friends, toggleEdit, connectWithFriend, setUserId }) => {
 
 
   
@@ -83,7 +83,7 @@ export const UserSideBar = ({socket, friends, toggleEdit, connectWithFriend }) =
                   <div
                     key={"chat " + index}
                     className="flex items-center text-sm rounded-md bg-[#ededed] p-1 pl-4 hover:cursor-pointer"
-                    onClick={() => connectWithFriend(chat._id)}
+                    onClick={() => connectWithFriend(chat._id, chat.name)}
                   >
                     {/* <AvatarComponent
                     src={chat.avatar}

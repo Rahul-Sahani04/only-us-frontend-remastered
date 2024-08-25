@@ -22,13 +22,12 @@ import { SendIcon } from "../raw_components/raw_icons";
 import axios from "axios";
 import toast from "react-hot-toast";
 
-export function ChatDrawer({ editOpen, showEdit, closeEdit, toUserId, socket }) {
+export function ChatDrawer({ editOpen, showEdit, closeEdit, toUserId, socket, messages, setMessages, friendName }) {
   const [userId, setUserId] = useState("");
+  const [name , setName] = useState(friendName);
 
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState([
-    { text: "This is the start of the conversation", user: "anony" },
-  ]);
+  
   const [targetId, setTargetId] = useState("");
   const chatInput = React.createRef();
   const sendButton = React.createRef();
@@ -47,7 +46,7 @@ export function ChatDrawer({ editOpen, showEdit, closeEdit, toUserId, socket }) 
       if (response.data.success) {
         setUserId(response.data.id);
         console.log("User: ", response.data);
-        console.log("User ID: ", response.data.id === messages.from);
+        // console.log("User ID: ", response.data.id === messages.from);
       }
     } catch (err) {
       console.error("Error fetching user:", err);
@@ -56,6 +55,8 @@ export function ChatDrawer({ editOpen, showEdit, closeEdit, toUserId, socket }) 
 
   const fetchMessages = async () => {
     try {
+      if (!toUserId) return;
+
       console.log("toID: ", toUserId);
       // http://localhost:5004/api/messagingLogic/messages/66a3b2e1fb33960e6b9ddfed
       const response = await axios.get(
@@ -70,10 +71,12 @@ export function ChatDrawer({ editOpen, showEdit, closeEdit, toUserId, socket }) 
       if (response.data.success) {
         const originalMessages = response.data.messages;
 
+        setName(response.data?.name);
+
 
         // Conditionally check if the user is the sender or receiver
-        console.log("User is sender 0: ", originalMessages[0].from === userId);
-        console.log("User is sender 1: ", originalMessages[1].from === userId);
+        console.log("User is sender 0: ", originalMessages[0]?.from === userId);
+        console.log("User is sender 1: ", originalMessages[1]?.from === userId);
 
         const mergedMessages = {
           _id: "merged",
@@ -82,11 +85,11 @@ export function ChatDrawer({ editOpen, showEdit, closeEdit, toUserId, socket }) 
           messages: [
             ...originalMessages[0].messages.map((msg) => ({
               ...msg,
-              direction: originalMessages[0].from === userId ? "sent" : "received",
+              direction: originalMessages[0]?.from === userId ? "sent" : "received",
             })),
             ...originalMessages[1].messages.map((msg) => ({
               ...msg,
-              direction: originalMessages[1].from === userId ? "sent" : "received",
+              direction: originalMessages[1]?.from === userId ? "sent" : "received",
             })),
           ].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)), // Sort messages by timestamp,
           createdAt: originalMessages[0].createdAt,
@@ -94,7 +97,7 @@ export function ChatDrawer({ editOpen, showEdit, closeEdit, toUserId, socket }) 
           __v: 0,
         };
 
-        setMessages(mergedMessages);
+        setMessages(mergedMessages.messages);
         console.log(response.data.messages);
       } else {
         console.log(response.data.message);
@@ -102,6 +105,7 @@ export function ChatDrawer({ editOpen, showEdit, closeEdit, toUserId, socket }) 
         // setError(response.data.message);
       }
     } catch (err) {
+      
       // setError('Error fetching messages');
       console.error("Error fetching messages:", err);
     }
@@ -111,6 +115,14 @@ export function ChatDrawer({ editOpen, showEdit, closeEdit, toUserId, socket }) 
     if (!message.trim()) return;
 
     try {
+      setMessage("");
+      console.log("My Message: ", message);
+      // Append the sent message to the messages array in the state and update the state with the new message
+      setMessages(prevMessages => [...prevMessages, { text: message, direction: "sent" }]);
+
+
+
+
       console.log("targetId: ", targetId);
       // const response = await axios.post(
       //   "http://localhost:5004/api/messagingLogic/message",
@@ -131,7 +143,7 @@ export function ChatDrawer({ editOpen, showEdit, closeEdit, toUserId, socket }) 
       //   toast.error(response.data.message);
       // }
 
-      socket.emit("message2", {
+      socket.emit("message2friend", {
         authToken: localStorage.getItem("auth-Token"),
         toId: targetId,
         text: message,
@@ -155,11 +167,18 @@ export function ChatDrawer({ editOpen, showEdit, closeEdit, toUserId, socket }) 
     }
   };
 
+  
   React.useEffect(() => {
+    console.log("toUserId: ", toUserId);
+
     fetchUser();
     if (toUserId) {
       setTargetId(toUserId);
-      fetchMessages();
+      fetchMessages();  
+    }
+    if (messages){
+      console.log("Messages: ", messages);
+      setMessages(messages.messages);
     }
 
     return () => {
@@ -191,7 +210,7 @@ export function ChatDrawer({ editOpen, showEdit, closeEdit, toUserId, socket }) 
         >
           <DrawerContent className="sm:max-w-lg">
             <DrawerHeader>
-              <DrawerTitle>FriendList: {toUserId} </DrawerTitle>
+              <DrawerTitle>FriendList: {name} </DrawerTitle>
               <DrawerDescription className="mt-1 text-sm">
                 Since - 2024
               </DrawerDescription>
@@ -199,8 +218,8 @@ export function ChatDrawer({ editOpen, showEdit, closeEdit, toUserId, socket }) 
             <DrawerBody className="h-4/6 border-primary ">
               <div className="flex min-h-full max-h-full flex-col gap-2 overflow-y-scroll p-4 ">
 
-                {messages.messages &&
-                  messages.messages.map((msg, index) => (
+                {messages &&
+                  messages.map((msg, index) => (
                     <div
                       key={index}
                       className={`flex items-start gap-4 ${
@@ -208,6 +227,13 @@ export function ChatDrawer({ editOpen, showEdit, closeEdit, toUserId, socket }) 
                           ? "justify-end"
                           : "justify-start"
                       }`}
+                      // auto scroll to bottom of chat messages when new message 
+                      // is received or sent
+                      ref={(el) => {
+                        if (el && index === messages.length - 1) {
+                          el.scrollIntoView({ behavior: "smooth" });
+                        }
+                      }}
                     >
                       <div className="rounded-full bg-secondary-foreground px-3 py-2 text-sm text-secondary">
                         <ChatMessageContainer
